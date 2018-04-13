@@ -93,7 +93,7 @@ var Engine = (function(global) {
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
-            // enemy.checkCollisions();
+            enemy.checkCollisions();
         });
         player.update();
     }
@@ -156,6 +156,10 @@ var Engine = (function(global) {
             enemy.render();
         });
 
+        allDecals.forEach(function(decal) {
+          decal.render();
+        });
+
         player.render();
     }
 
@@ -177,7 +181,9 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
-        'images/blood.png'
+        'images/blood.png',
+        'images/key.png',
+        'images/door.png'
     ]);
     Resources.onReady(init);
 
