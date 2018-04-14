@@ -121,7 +121,8 @@ class Enemy {
     }
   }
 
-  const player = new Player();
+  let player = new Player();
+
 
   let allEnemies = [];
   let allDecals = [];
@@ -134,6 +135,35 @@ class Enemy {
       this.playerLives = 3;
       this.isGameStart = false;
       this.isGameover = false;
+      // All characters to select
+      const chars = document.querySelectorAll('.char');
+      this.characters = [];
+      for (const c of chars) {
+        this.characters.push(c);
+      }
+      this.charInd = 1;
+    }
+
+    choosePlayer(num) {
+
+      this.charInd += num;
+      this.charSelected = this.characters[this.charInd];
+
+      this.characters.forEach(el => el.parentNode.querySelector('.selector').innerHTML = '');
+
+      let currentChar = this.characters[this.charInd].parentNode.querySelector('.selector');
+
+      const imgContent = `<img src="images/Selector.png">`;
+
+      // Add selector on selected player
+      currentChar.innerHTML = imgContent;
+      // Update selected player
+      player.sprite = this.selectedPlayer();
+    }
+
+    selectedPlayer() {
+      player.sprite = this.characters[this.charInd].querySelector('img').getAttribute('src');
+      return player.sprite;
     }
 
     init() {
@@ -200,10 +230,12 @@ class Enemy {
 
   let gameMaster = new GameMaster();
 
-  // This listens for key presses and sends the keys to Player.handleInput() method
+  const gameOverModal = document.querySelector('.gameover-modal');
+  const gameStartMenu = document.querySelector('.start-menu');
+
   document.addEventListener('keydown', function(e) {
 
-    if (gameMaster.isPlayerDead || gameMaster.isGameover || !gameMaster.isGameStart) return;
+    if (gameMaster.isPlayerDead || gameMaster.isGameover) return;
 
     var allowedKeys = {
       37: 'left',
@@ -212,20 +244,25 @@ class Enemy {
       40: 'down'
     };
 
+    // Game start menu
+    if (!gameMaster.isGameStart) {
+      if (e.keyCode === 32) {
+        gameStartMenu.style.display = 'none';
+        gameMaster.isGameStart = true;
+        gameMaster.generateEnemies(6);
+      } else if (e.keyCode === 37) { // select left hand player
+        gameMaster.charInd <= 0 ? false : gameMaster.choosePlayer(-1);
+      } else if (e.keyCode === 39) { // select right hand player
+        gameMaster.charInd >= 2 ? false : gameMaster.choosePlayer(1);
+      }
+
+      return;
+    }
+
     player.handleInput(allowedKeys[e.keyCode]);
+
   });
 
-
-const gameOverModal = document.querySelector('.gameover-modal');
-const gameStartMenu = document.querySelector('.start-menu');
-
-// Game start menu
-gameStartMenu.addEventListener('click', function(e) {
-  // TODO: RESET enemies and player
-  this.style.display = 'none';
-  gameMaster.isGameStart = true;
-  gameMaster.generateEnemies(6);
-});
 
 // Replay & reset game
 gameOverModal.addEventListener('click', function(e) {
