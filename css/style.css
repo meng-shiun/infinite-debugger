@@ -9,6 +9,7 @@ body {
 }
 
 .wrapper {
+  position: relative;
   height: 98vh;
   display: flex;
   flex-flow: column nowrap;
@@ -34,4 +35,22 @@ canvas {
   width: 120px;
   padding: 0.8em;
   margin: 0 0 0 1em;
+}
+
+.start-menu {
+  display: block;
+  position: absolute;
+  width: 400px;
+  height: 200px;
+  background-color: pink;
+  z-index: 3;
+}
+
+.gameover-modal {
+  display: none;
+  position: absolute;
+  width: 400px;
+  height: 300px;
+  background-color: white;
+  z-index: 2;
 }

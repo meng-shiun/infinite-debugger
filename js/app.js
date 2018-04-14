@@ -25,7 +25,7 @@ class Enemy {
       this.y = gameMaster.getRandomY();
       this.speed = gameMaster.levelSpeed();
     }
-    // console.log('enemy position: ', this.x, this.y);
+
     this.checkCollisions();
   }
 
@@ -52,23 +52,32 @@ class Enemy {
   // Player
   class Player {
 
-    constructor(locX, locY) {
+    constructor() {
       this.sprite = 'images/char-boy.png';
-      this.x = locX;
-      this.y = locY;
+      this.x = 404;
+      this.y = 460;
     }
 
     respawn() {
       // Hide player off screen
-      this.x = 200;
-      this.y = 800;
+      this.hide();
+      gameMaster.updateLives();
 
       setTimeout(() => {
         // respawn point
-        this.x = 404;
-        this.y = 460;
+        this.init();
         gameMaster.isPlayerDead = false;
       }, 1000);
+    }
+
+    hide() {
+      this.x = 200;
+      this.y = 800;
+    }
+
+    init() {
+      this.x = 404;
+      this.y = 460;
     }
 
     update() {
@@ -112,7 +121,7 @@ class Enemy {
     }
   }
 
-  const player = new Player(404, 460);
+  const player = new Player();
 
   let allEnemies = [];
   let allDecals = [];
@@ -122,9 +131,25 @@ class Enemy {
 
     constructor() {
       this.isPlayerDead = false;
+      this.playerLives = 3;
+      this.isGameStart = false;
+      this.isGameover = false;
+    }
 
-      // TODO: when player's life is less than 0, game over
-      this.gameOver = false;
+    init() {
+      this.playerLives = 3;
+      this.isGameover = false;
+      player.init();
+      allEnemies = [];
+      allDecals = [];
+    }
+
+    updateLives() {
+      this.playerLives--;
+
+      if (this.playerLives < 1) {
+        this.isGameover = true;
+      }
     }
 
     generateEnemies(num) {
@@ -159,24 +184,26 @@ class Enemy {
     }
 
     update() {
-
+      // Reset game when game over
+      document.querySelector('#lives').innerHTML = this.playerLives;
+      if (this.isGameover) {
+        this.gameOver();
+      }
     }
 
-    render() {
-
+    gameOver() {
+      gameOverModal.style.display = 'block';
+      player.hide();
     }
 
   }
 
-
-  // TODO: Start game when press spacebar
   let gameMaster = new GameMaster();
-  gameMaster.generateEnemies(6);
 
   // This listens for key presses and sends the keys to Player.handleInput() method
   document.addEventListener('keydown', function(e) {
 
-    if (gameMaster.isPlayerDead) return;
+    if (gameMaster.isPlayerDead || gameMaster.isGameover || !gameMaster.isGameStart) return;
 
     var allowedKeys = {
       37: 'left',
@@ -187,3 +214,24 @@ class Enemy {
 
     player.handleInput(allowedKeys[e.keyCode]);
   });
+
+
+const gameOverModal = document.querySelector('.gameover-modal');
+const gameStartMenu = document.querySelector('.start-menu');
+
+// Game start menu
+gameStartMenu.addEventListener('click', function(e) {
+  // TODO: RESET enemies and player
+  this.style.display = 'none';
+  gameMaster.isGameStart = true;
+  gameMaster.generateEnemies(6);
+});
+
+// Replay & reset game
+gameOverModal.addEventListener('click', function(e) {
+  this.style.display = 'none';
+  gameStartMenu.style.display = 'block';
+  gameMaster.isGameover = false;
+  gameMaster.isGameStart = false;
+  gameMaster.init();
+});
