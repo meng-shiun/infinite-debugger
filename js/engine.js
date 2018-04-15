@@ -97,6 +97,7 @@ var Engine = (function(global) {
             enemy.checkCollisions();
         });
         key.update();
+        door.update();
         player.update();
         gameMaster.update();
     }
@@ -166,6 +167,7 @@ var Engine = (function(global) {
         });
 
         key.render();
+        door.render();
 
         player.render();
     }

@@ -40,6 +40,8 @@ class Enemy {
         gameMaster.isPlayerDead = true;
         // Respawn player
         player.respawn();
+        // Update player's lives
+        gameMaster.updateLives();
       }
     }
 
@@ -61,7 +63,6 @@ class Enemy {
     respawn() {
       // Hide player off screen
       this.hide();
-      gameMaster.updateLives();
 
       setTimeout(() => {
         // respawn point
@@ -155,8 +156,47 @@ class Enemy {
     }
   }
 
+  class Door {
+
+    constructor() {
+      this.isShown = true;
+      this.sprite = 'images/door.png';
+    }
+
+    setDoor(posX, posY) {
+      this.x = posX;
+      this.y = posY;
+    }
+
+    hideDoor() {
+      this.isShown = false;
+    }
+
+    showDoor() {
+      this.isShown = true;
+    }
+
+    update() {
+      if (!this.isShown) return;
+      this.checkCollisions();
+    }
+
+    render() {
+      if (!this.isShown) return;
+      ctx.drawImage(Resources.get(this.sprite), this.x , this.y);
+    }
+
+    checkCollisions() { // If player pick up the key & reach the door
+      if (this.x === player.x && this.y === player.y && gameMaster.isPlayerGetKey) {
+        // hide the door and go to next level
+        gameMaster.isPlayerGetDoor = true;
+        console.log('level complete');
+      }
+    }
+  }
 
   let key = new Key();
+  let door = new Door();
 
   let player = new Player();
 
@@ -179,6 +219,7 @@ class Enemy {
       }
       this.charInd = 1;
       this.isPlayerGetKey = false;
+      this.isPlayerGetDoor = false;
     }
 
     choosePlayer(num) {
@@ -217,6 +258,15 @@ class Enemy {
       randomY = (randomY == -38) ? 45 : (randomY == 460) ? 377 : randomY;
       console.log('Key postion: ', randomX, randomY);
       key.setKey(randomX, randomY);
+    }
+
+    generateDoor() {
+      let randomX = Math.floor(Math.random() * 9) * 101;
+      door.setDoor(randomX, -38);
+
+      setTimeout(() => {
+        door.showDoor();
+      }, 1200);
     }
 
     updateLives() {
@@ -266,9 +316,19 @@ class Enemy {
       }
 
       // Detect if player get the key
-      if (this.isPlayerGetKey) {
-        key.hideKey();
+      this.isPlayerGetKey ? key.hideKey() : false;
+      // Detect if player get the door with key
+      // If true, reset player's postion and go to next level
+      if (this.isPlayerGetDoor) {
+        this.isPlayerGetKey = false;
+        this.isPlayerGetDoor = false;
+        
+        door.hideDoor();
+        this.generateKey();
+        this.generateDoor();
+        player.respawn();
       }
+
     }
 
     gameOver() {
@@ -286,7 +346,7 @@ class Enemy {
 
   document.addEventListener('keydown', function(e) {
 
-    if (gameMaster.isPlayerDead || gameMaster.isGameover) return;
+    if (gameMaster.isPlayerDead || gameMaster.isGameover || gameMaster.isPlayerGetDoor) return;
 
     var allowedKeys = {
       37: 'left',
@@ -302,6 +362,7 @@ class Enemy {
         gameMaster.isGameStart = true;
         gameMaster.generateEnemies(6);
         gameMaster.generateKey();
+        gameMaster.generateDoor();
       } else if (e.keyCode === 37) { // select left hand player
         gameMaster.charInd <= 0 ? false : gameMaster.choosePlayer(-1);
       } else if (e.keyCode === 39) { // select right hand player
