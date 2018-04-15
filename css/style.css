@@ -51,7 +51,6 @@ canvas {
   justify-content: space-around;
 }
 
-
 .char {
   position: relative;
   z-index: 100;

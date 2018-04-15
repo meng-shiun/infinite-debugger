@@ -89,7 +89,7 @@ class Enemy {
     }
 
     handleInput(keyInput) {
-
+      console.log(this.x, this.y);
       switch (keyInput) {
         case 'left':
         this.x < 101 ? this.x = this.x : this.x -= 101;
@@ -119,15 +119,51 @@ class Enemy {
     render() {
       ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
+
   }
 
-  let player = new Player();
+  // Key required for door to enter next level
+  class Key {
 
+    constructor() {
+      this.sprite = 'images/key.png';
+    }
+
+    setKey(posX, posY) {
+      this.x = posX;
+      this.y = posY;
+    }
+
+    hideKey() {
+      this.x = 200;
+      this.y = 800;
+    }
+
+    update() {
+      this.checkCollisions();
+    }
+
+    render() {
+      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+
+    checkCollisions() { // If player pick up the key
+      if (this.x === player.x && this.y === player.y) {
+        // hide the key and look for door
+        gameMaster.isPlayerGetKey = true;
+      }
+    }
+  }
+
+
+  let key = new Key();
+
+  let player = new Player();
 
   let allEnemies = [];
   let allDecals = [];
 
-  // Game Master, control enemies, score, health, gems, levels...
+  // Game Master, controls enemies, score, health, gems, levels, key & door
   class GameMaster {
 
     constructor() {
@@ -142,6 +178,7 @@ class Enemy {
         this.characters.push(c);
       }
       this.charInd = 1;
+      this.isPlayerGetKey = false;
     }
 
     choosePlayer(num) {
@@ -172,6 +209,14 @@ class Enemy {
       player.init();
       allEnemies = [];
       allDecals = [];
+    }
+
+    generateKey() {
+      let randomX = Math.floor(Math.random() * 9) * 101;
+      let randomY = Math.floor(Math.random() * 7) * 83 - 38;
+      randomY = (randomY == -38) ? 45 : (randomY == 460) ? 377 : randomY;
+      console.log('Key postion: ', randomX, randomY);
+      key.setKey(randomX, randomY);
     }
 
     updateLives() {
@@ -219,6 +264,11 @@ class Enemy {
       if (this.isGameover) {
         this.gameOver();
       }
+
+      // Detect if player get the key
+      if (this.isPlayerGetKey) {
+        key.hideKey();
+      }
     }
 
     gameOver() {
@@ -232,6 +282,7 @@ class Enemy {
 
   const gameOverModal = document.querySelector('.gameover-modal');
   const gameStartMenu = document.querySelector('.start-menu');
+
 
   document.addEventListener('keydown', function(e) {
 
@@ -250,6 +301,7 @@ class Enemy {
         gameStartMenu.style.display = 'none';
         gameMaster.isGameStart = true;
         gameMaster.generateEnemies(6);
+        gameMaster.generateKey();
       } else if (e.keyCode === 37) { // select left hand player
         gameMaster.charInd <= 0 ? false : gameMaster.choosePlayer(-1);
       } else if (e.keyCode === 39) { // select right hand player

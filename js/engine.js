@@ -96,6 +96,7 @@ var Engine = (function(global) {
             enemy.update(dt);
             enemy.checkCollisions();
         });
+        key.update();
         player.update();
         gameMaster.update();
     }
@@ -122,6 +123,8 @@ var Engine = (function(global) {
             numRows = 7,
             numCols = 9,
             row, col;
+
+        var keyImage = 'images/key.png';
 
         // Before drawing, clear existing canvas
         ctx.clearRect(0,0,canvas.width,canvas.height)
@@ -161,6 +164,8 @@ var Engine = (function(global) {
         allDecals.forEach(function(decal) {
           decal.render();
         });
+
+        key.render();
 
         player.render();
     }
