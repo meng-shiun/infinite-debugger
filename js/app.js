@@ -1,4 +1,3 @@
-// Enemy
 class Enemy {
 
   constructor(locX, locY) {
@@ -21,8 +20,8 @@ class Enemy {
 
     if (this.x > 1000) {
       // Respawn enemy position & set speed
-      this.x = gameMaster.getRandomX();
-      this.y = gameMaster.getRandomY();
+      this.x = gameMaster.getEnemyRandomX();
+      this.y = gameMaster.getEnemyRandomY();
       this.speed = gameMaster.levelSpeed();
     }
 
@@ -51,7 +50,6 @@ class Enemy {
     }
   }
 
-  // Player
   class Player {
 
     constructor() {
@@ -74,7 +72,6 @@ class Enemy {
     hide() {
       this.x = 200;
       this.y = 800;
-      this.isShown = false;
     }
 
     init() {
@@ -121,7 +118,6 @@ class Enemy {
     render() {
       ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
-
   }
 
   // Key required for door to enter next level
@@ -129,6 +125,7 @@ class Enemy {
 
     constructor() {
       this.sprite = 'images/key.png';
+      this.isShown = true;
     }
 
     setKey(posX, posY) {
@@ -136,24 +133,18 @@ class Enemy {
       this.y = posY;
     }
 
-    hideKey() {
-      this.x = 200;
-      this.y = 800;
-    }
-
     update() {
       this.checkCollisions();
     }
 
     render() {
+      if (!this.isShown) return;
       ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
 
-    checkCollisions() { // If player pick up the key
-      if (this.x === player.x && this.y === player.y) {
-        // hide the key and look for door
-        gameMaster.isPlayerGetKey = true;
-      }
+    checkCollisions() {
+      // If player pick up the key, hide the key and look for door
+      if (this.x === player.x && this.y === player.y) gameMaster.isPlayerGetKey = true;
     }
   }
 
@@ -191,11 +182,38 @@ class Enemy {
       if (this.x === player.x && this.y === player.y && gameMaster.isPlayerGetKey) {
         // hide the door and go to next level
         gameMaster.isPlayerGetDoor = true;
-        console.log('level complete');
       }
     }
   }
 
+  class Pickup {
+
+    constructor(sprite, posX, posY, value) {
+      this.sprite = sprite;
+      this.x = posX;
+      this.y = posY;
+      this.shown = true;
+      this.value = value;
+    }
+
+    update() {
+      // Stop adding value when it's invisible
+      gameMaster.isBonusAdded = this.shown ? false : true;
+    }
+
+    checkCollisions() {
+      if (player.x === this.x && player.y == this.y) {
+        this.shown = false;
+        // Add bonus when the item is picked
+        gameMaster.updateBonus(this.value);
+      }
+    }
+
+    render() {
+      if (!this.shown) return;
+      ctx.drawImage(Resources.get(this.sprite), this.x , this.y);
+    }
+  }
 
   let key = new Key();
   let door = new Door();
@@ -204,6 +222,7 @@ class Enemy {
 
   let allEnemies = [];
   let allDecals = [];
+  let allPickup = [];
 
   // Game Master, controls enemies, score, health, gems, levels, key & door
   class GameMaster {
@@ -225,6 +244,7 @@ class Enemy {
       this.level = 1;
       this.money = 0;
       this.bonus = 0;
+      this.isBonusAdded = false;
     }
 
     choosePlayer(num) {
@@ -251,21 +271,26 @@ class Enemy {
     init() {
       this.playerLives = 3;
       this.isGameover = false;
+      this.isPlayerGetKey = false;
       player.init();
       this.level = 1;
       this.money = 0;
       this.bonus = 0;
-      this.isPlayerGetKey = false;
       allEnemies = [];
+      allPickup = [];
       allDecals = [];
     }
 
     generateKey() {
       let randomX = Math.floor(Math.random() * 9) * 101;
-      let randomY = Math.floor(Math.random() * 7) * 83 - 38;
-      randomY = (randomY == -38) ? 211 : (randomY == 460) ? 377 : randomY;
-      console.log('Key postion: ', randomX, randomY);
-      key.setKey(randomX, randomY);
+      let randomY = () => {
+        let y = Math.floor(Math.random() * 7) * 83 - 38;
+        if (y === -38 || y === 460) return randomY();
+        return y;
+      }
+
+      console.log('Key postion: ', randomX, randomY());
+      key.setKey(randomX, randomY());
     }
 
     generateDoor() {
@@ -280,59 +305,81 @@ class Enemy {
     updateLives() {
       this.playerLives--;
 
-      if (this.playerLives < 1) {
-        this.isGameover = true;
+      if (this.playerLives < 1) this.isGameover = true;
+    }
+
+    updateBonus(val) {
+      if (!this.isBonusAdded) {
+        this.isBonusAdded = true;
+        this.bonus += val;
       }
     }
 
     generateEnemies(num) {
-      this.randomX = () => -(Math.floor(Math.random() * 400));
+      this.enemyRandomX = () => -(Math.floor(Math.random() * 400));
 
       const positionY = [60, 144, 228, 312, 396];
 
-      this.randomY = () => {
+      this.enemyRandomY = () => {
         let ind = Math.floor(Math.random() * positionY.length);
         return positionY[ind];
       }
 
       for (let i = 0; i < num; i++) {
-        let enemy = new Enemy(this.randomX(), this.randomY());
+        let enemy = new Enemy(this.enemyRandomX(), this.enemyRandomY());
         allEnemies.push(enemy);
       }
-
     }
 
-    // Increse speed for next level
+
+    generatePickup() {
+      let takenY = []; // temp array to store taken y slot
+
+      let randomX = () => Math.floor(Math.random() * 9) * 101;
+      let randomY = () => {
+        let y = Math.floor(Math.random() * 7) * 83 - 38;
+
+        // Avoid taking the same position from key
+        if (y === -38 || y === 460 || (y === key.y && randomX() === key.x) || takenY.indexOf(y) > -1) {
+          return randomY();
+        }
+        takenY.push(y);
+        return y;
+      }
+
+      let pickupA = new Pickup('images/pickup_01.png', randomX(), randomY(), 50);
+      let pickupB = new Pickup('images/pickup_02.png', randomX(), randomY(), 10);
+      let pickupC = new Pickup('images/pickup_03.png', randomX(), randomY(), 30);
+
+      let pickupArr = [pickupA, pickupB, pickupC];
+
+      let randomAmount = Math.floor(Math.random() * pickupArr.length) + 1;
+
+      // Randomize pickup quantity
+      for (let i = 0 ; i < randomAmount; i++) allPickup.push(pickupArr[i])
+    }
+
     levelSpeed() {
       let level = this.level;
       this.randomSpeed = Math.floor(Math.random() * 60) + 40 * (level / 10) + 80;
       return this.randomSpeed;
     }
 
-    getRandomX() {
-      return this.randomX();
-    }
+    getEnemyRandomX() { return this.enemyRandomX() }
 
-    getRandomY() {
-      return this.randomY();
-    }
+    getEnemyRandomY() { return this.enemyRandomY() }
 
     update() {
       // Reset game when game over
       document.querySelector('#lives').innerHTML = this.playerLives;
-      if (this.isGameover) {
-        this.gameOver();
-      }
+      if (this.isGameover) this.gameOver();
 
-      // Current level
-      document.querySelector('#level').textContent = this.level;
-      // Current money
-      document.querySelector('#money').textContent = this.money;
-      // Current bonus
-      document.querySelector('#bonus').textContent = this.bonus;
+      document.querySelector('#level').textContent = this.level; // Current level
+      document.querySelector('#money').textContent = this.money; // Current money
+      document.querySelector('#bonus').textContent = this.bonus; // Current bonus
 
       // Detect if player get the key
-      this.isPlayerGetKey ? key.hideKey() : false;
+      this.isPlayerGetKey ? key.isShown = false : key.isShown = true;
       // Detect if player get the door with key
       // If true, reset player's postion and go to next level
       if (this.isPlayerGetDoor) {
@@ -342,14 +389,16 @@ class Enemy {
         door.hideDoor();
         this.generateKey();
         this.generateDoor();
+        allPickup = [];
+        this.generatePickup();
         player.respawn();
 
         this.level += 1;
         this.money += 100;
-        // Add extra enemy every 3 levels
-        (this.level % 3 === 0) ? this.generateEnemies(1) : false;
-      }
 
+        // Add extra enemy every 3 levels
+        this.level % 3 === 0 ? this.generateEnemies(1) : false;
+      }
     }
 
     gameOver() {
@@ -384,6 +433,7 @@ class Enemy {
         gameMaster.generateEnemies(5);
         gameMaster.generateKey();
         gameMaster.generateDoor();
+        gameMaster.generatePickup();
       } else if (e.keyCode === 37) { // select left hand player
         gameMaster.charInd <= 0 ? false : gameMaster.choosePlayer(-1);
       } else if (e.keyCode === 39) { // select right hand player
@@ -394,15 +444,14 @@ class Enemy {
     }
 
     player.handleInput(allowedKeys[e.keyCode]);
-
   });
 
 
-// Replay & reset game
-gameOverModal.addEventListener('click', function(e) {
-  this.style.display = 'none';
-  gameStartMenu.style.display = 'block';
-  gameMaster.isGameover = false;
-  gameMaster.isGameStart = false;
-  gameMaster.init();
-});
+  // Replay & reset game
+  gameOverModal.addEventListener('click', function(e) {
+    this.style.display = 'none';
+    gameStartMenu.style.display = 'block';
+    gameMaster.isGameover = false;
+    gameMaster.isGameStart = false;
+    gameMaster.init();
+  });
