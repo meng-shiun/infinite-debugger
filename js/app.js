@@ -14,13 +14,13 @@ class Enemy {
 
   // Update the enemy's position, required method for game
   // Parameter: dt, a time delta between ticks
-  update(dt, level = 1) {
+  update(dt) {
     // Multiply any movement by the dt parameter to ensure the game runs at the same speed for all computers.
     // Random speed change according to the level
     this.x += this.speed * dt;
 
     if (this.x > 1000) {
-      // Respawn enemy postiion & speed
+      // Respawn enemy position & set speed
       this.x = gameMaster.getRandomX();
       this.y = gameMaster.getRandomY();
       this.speed = gameMaster.levelSpeed();
@@ -68,12 +68,13 @@ class Enemy {
         // respawn point
         this.init();
         gameMaster.isPlayerDead = false;
-      }, 1000);
+      }, 600);
     }
 
     hide() {
       this.x = 200;
       this.y = 800;
+      this.isShown = false;
     }
 
     init() {
@@ -195,6 +196,7 @@ class Enemy {
     }
   }
 
+
   let key = new Key();
   let door = new Door();
 
@@ -220,10 +222,12 @@ class Enemy {
       this.charInd = 1;
       this.isPlayerGetKey = false;
       this.isPlayerGetDoor = false;
+      this.level = 1;
+      this.money = 0;
+      this.bonus = 0;
     }
 
     choosePlayer(num) {
-
       this.charInd += num;
       this.charSelected = this.characters[this.charInd];
 
@@ -248,6 +252,10 @@ class Enemy {
       this.playerLives = 3;
       this.isGameover = false;
       player.init();
+      this.level = 1;
+      this.money = 0;
+      this.bonus = 0;
+      this.isPlayerGetKey = false;
       allEnemies = [];
       allDecals = [];
     }
@@ -255,7 +263,7 @@ class Enemy {
     generateKey() {
       let randomX = Math.floor(Math.random() * 9) * 101;
       let randomY = Math.floor(Math.random() * 7) * 83 - 38;
-      randomY = (randomY == -38) ? 45 : (randomY == 460) ? 377 : randomY;
+      randomY = (randomY == -38) ? 211 : (randomY == 460) ? 377 : randomY;
       console.log('Key postion: ', randomX, randomY);
       key.setKey(randomX, randomY);
     }
@@ -266,7 +274,7 @@ class Enemy {
 
       setTimeout(() => {
         door.showDoor();
-      }, 1200);
+      }, 1000);
     }
 
     updateLives() {
@@ -278,7 +286,7 @@ class Enemy {
     }
 
     generateEnemies(num) {
-      this.randomX = () => -(Math.floor(Math.random() * 500));
+      this.randomX = () => -(Math.floor(Math.random() * 400));
 
       const positionY = [60, 144, 228, 312, 396];
 
@@ -296,7 +304,8 @@ class Enemy {
 
     // Increse speed for next level
     levelSpeed() {
-      this.randomSpeed = Math.floor(Math.random() * 140) + 140;
+      let level = this.level;
+      this.randomSpeed = Math.floor(Math.random() * 60) + 40 * (level / 10) + 80;
       return this.randomSpeed;
     }
 
@@ -315,6 +324,13 @@ class Enemy {
         this.gameOver();
       }
 
+      // Current level
+      document.querySelector('#level').textContent = this.level;
+      // Current money
+      document.querySelector('#money').textContent = this.money;
+      // Current bonus
+      document.querySelector('#bonus').textContent = this.bonus;
+
       // Detect if player get the key
       this.isPlayerGetKey ? key.hideKey() : false;
       // Detect if player get the door with key
@@ -322,11 +338,16 @@ class Enemy {
       if (this.isPlayerGetDoor) {
         this.isPlayerGetKey = false;
         this.isPlayerGetDoor = false;
-        
+
         door.hideDoor();
         this.generateKey();
         this.generateDoor();
         player.respawn();
+
+        this.level += 1;
+        this.money += 100;
+        // Add extra enemy every 3 levels
+        (this.level % 3 === 0) ? this.generateEnemies(1) : false;
       }
 
     }
@@ -360,7 +381,7 @@ class Enemy {
       if (e.keyCode === 32) {
         gameStartMenu.style.display = 'none';
         gameMaster.isGameStart = true;
-        gameMaster.generateEnemies(6);
+        gameMaster.generateEnemies(5);
         gameMaster.generateKey();
         gameMaster.generateDoor();
       } else if (e.keyCode === 37) { // select left hand player
