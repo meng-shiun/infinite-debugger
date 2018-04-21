@@ -272,6 +272,7 @@ class Enemy {
     init() {
       this.playerLives = 3;
       this.isGameover = false;
+      this.isGameStart = false;
       this.isPlayerGetKey = false;
       player.init();
       this.level = 0;
@@ -283,6 +284,9 @@ class Enemy {
       allEnemies = [];
       allPickup = [];
       allDecals = [];
+
+      document.querySelector('.gameover-modal').style.display = 'none';
+      document.querySelector('.start-menu').style.display = 'block';
     }
 
     generateKey() {
@@ -436,13 +440,12 @@ class Enemy {
 
   let gameMaster = new GameMaster();
 
-  const gameOverModal = document.querySelector('.gameover-modal');
-  const gameStartMenu = document.querySelector('.start-menu');
-
+  const gameOverModal   = document.querySelector('.gameover-modal');
+  const gameStartMenu   = document.querySelector('.start-menu');
+  const showInstruction = document.querySelector('.instruction');
 
   document.addEventListener('keydown', function(e) {
-
-    if (gameMaster.isPlayerDead || gameMaster.isGameover || gameMaster.isPlayerGetDoor) return;
+    if (gameMaster.isPlayerDead || gameMaster.isPlayerGetDoor) return;
 
     var allowedKeys = {
       37: 'left',
@@ -451,10 +454,13 @@ class Enemy {
       40: 'down'
     };
 
+
     // Game start menu
     if (!gameMaster.isGameStart) {
-      if (e.keyCode === 32) {
+
+      if (e.keyCode === 32) { // press space
         gameStartMenu.style.display = 'none';
+        showInstruction.style.display = 'none';
         gameMaster.isGameStart = true;
         gameMaster.generateEnemies(5);
         gameMaster.generateKey();
@@ -469,15 +475,39 @@ class Enemy {
       return;
     }
 
+    // Game over menu
+    (gameMaster.isGameover && e.keyCode === 32) ? gameMaster.init() : false;
+
     player.handleInput(allowedKeys[e.keyCode]);
   });
 
 
-  // Replay & reset game
-  gameOverModal.addEventListener('click', function(e) {
-    this.style.display = 'none';
-    gameStartMenu.style.display = 'block';
-    gameMaster.isGameover = false;
-    gameMaster.isGameStart = false;
-    gameMaster.init();
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('open')) { // Open instruction menu
+      showInstruction.style.display = 'block';
+      gameStartMenu.style.display = 'none';
+    } else if (e.target.classList.contains('close')){ // Close instruction menu
+      showInstruction.style.display = 'none';
+      gameStartMenu.style.display = 'block';
+    } else if (e.target.classList.contains('replay')) { // Replay & reset game
+      gameMaster.init();
+    }
+  });
+
+  document.addEventListener('mouseover', function(e) {
+    let target = e.target.classList;
+    let parent = e.target.parentNode;
+    if (target.contains('open') && parent.querySelector('svg').classList.contains('gameplay') ||
+        target.contains('close') && parent.querySelector('svg').classList.contains('gameplay')) {
+          parent.querySelector('.gameplay').classList.add('active');
+    }
+  });
+
+  document.addEventListener('mouseout', function(e) {
+    let target = e.target.classList;
+    let parent = e.target.parentNode;
+    if (target.contains('open') && parent.querySelector('svg').classList.contains('gameplay') ||
+        target.contains('close') && parent.querySelector('svg').classList.contains('gameplay')) {
+          parent.querySelector('.gameplay').classList.remove('active');
+    }
   });

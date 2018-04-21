@@ -12,6 +12,7 @@
   <main class="wrapper">
     <!-- Canvas -->
 
+    <!-- Status -->
     <div class="board">
       <span id="lives">3</span>
       <div class="stat-heart">
@@ -33,7 +34,7 @@
       </div>
     </div>
 
-
+    <!-- Start menu -->
     <div class="start-menu menu">
       <div class="characters">
         <div class="char1">
@@ -60,23 +61,37 @@
 
       <div class="start">
         <i class="fas fa-question-circle gameplay"></i>
+        <div class="open"></div>
         Select developer and press space to start
       </div>
     </div>
 
-    <div class="gameover-modal menu">
-      <div class="message">Junior developer</div>
-      <div class="score-des">MONTHLY SALARY</div>
-      <div class="salary-score content">$0</div>
-      <div class="score-des">PROGRAM RESCUED</div>
-      <div class="level-score content">0</div>
-      <button class="replay">Debug again</button>
-    </div>
+    <!-- How to play -->
+    <div class="instruction menu">
+      <i class="fas fa-times-circle gameplay"></i>
+      <div class="close"></div>
+      <p class="des-title">Instruction</p>
+      <p>Bugs are taking over the office computers!</p>
+      <p><img src="images/floppy.png">contains solution, bring it to the computer using the arrow keys.</p>
+      <p>Coders hate bugs, don't let them get you!</p>
 
-  </main>
 
-  <script src="js/resources.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/engine.js"></script>
-</body>
-</html>
+      </div>
+
+      <!-- Game over menu -->
+      <div class="gameover-modal menu">
+        <div class="message">Junior developer</div>
+        <div class="score-des">MONTHLY SALARY</div>
+        <div class="salary-score content">$0</div>
+        <div class="score-des">PROGRAM RESCUED</div>
+        <div class="level-score content">0</div>
+        <button class="replay">Debug again</button>
+      </div>
+
+    </main>
+
+    <script src="js/resources.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/engine.js"></script>
+  </body>
+  </html>
