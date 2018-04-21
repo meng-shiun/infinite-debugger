@@ -2,32 +2,49 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Infinite Debugger</title>
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
 </head>
 <body>
   <main class="wrapper">
     <!-- Canvas -->
 
     <div class="board">
-      <div>Life: <span id="lives">3</span></div>
-      <div>Money:<span id="money">0</span></div>
-      <div>Bonus:<span id="bonus">0</span></div>
-      <div>Level: <span id="level">1</span></div>
+      <span id="lives">3</span>
+      <div class="stat-heart">
+        <img src="images/heart-full.png">
+        <img src="images/heart-full.png">
+        <img src="images/heart-full.png">
+      </div>
+      <div class="stat-money">
+        <img src="images/money.png">
+        <span id="money" class="stat-text">0</span>
+      </div>
+      <div class="stat-bonus">
+        <img src="images/bonus.png">
+        <span id="bonus" class="stat-text">0</span>
+      </div>
+      <div class="stat-level">
+        <img src="images/level.png">
+        <span id="level" class="stat-text">0</span>
+      </div>
     </div>
 
 
-    <div class="start-menu">
+    <div class="start-menu menu">
       <div class="characters">
         <div class="char1">
           <div class="char">
-            <img src="images/char-cat-girl.png">
+            <img src="images/char_02.png">
           </div>
           <div class="selector"></div>
         </div>
         <div class="char2">
           <div class="char">
-            <img src="images/char-boy.png">
+            <img src="images/char_01.png">
           </div>
           <div class="selector">
             <img src="images/Selector.png">
@@ -35,20 +52,25 @@
         </div>
         <div class="char3">
           <div class="char">
-            <img src="images/char-horn-girl.png">
+            <img src="images/char_03.png">
           </div>
           <div class="selector"></div>
         </div>
       </div>
 
-      <div>
-        Choose character and press space to start
+      <div class="start">
+        <i class="fas fa-question-circle gameplay"></i>
+        Select developer and press space to start
       </div>
     </div>
 
-    <div class="gameover-modal">
-      Game Over
-      <button class="replay">Replay?</button>
+    <div class="gameover-modal menu">
+      <div class="message">Junior developer</div>
+      <div class="score-des">MONTHLY SALARY</div>
+      <div class="salary-score content">$0</div>
+      <div class="score-des">PROGRAM RESCUED</div>
+      <div class="level-score content">0</div>
+      <button class="replay">Debug again</button>
     </div>
 
   </main>

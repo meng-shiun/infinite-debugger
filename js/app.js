@@ -53,7 +53,7 @@ class Enemy {
   class Player {
 
     constructor() {
-      this.sprite = 'images/char-boy.png';
+      this.sprite = 'images/char_01.png';
       this.x = 404;
       this.y = 460;
     }
@@ -241,10 +241,11 @@ class Enemy {
       this.charInd = 1;
       this.isPlayerGetKey = false;
       this.isPlayerGetDoor = false;
-      this.level = 1;
+      this.level = 0;
       this.money = 0;
       this.bonus = 0;
       this.isBonusAdded = false;
+      this.heartSlots = document.querySelector('.stat-heart').children;
     }
 
     choosePlayer(num) {
@@ -273,9 +274,12 @@ class Enemy {
       this.isGameover = false;
       this.isPlayerGetKey = false;
       player.init();
-      this.level = 1;
+      this.level = 0;
       this.money = 0;
       this.bonus = 0;
+      for (let heart of this.heartSlots) {
+        heart.src = 'images/heart-full.png';
+      }
       allEnemies = [];
       allPickup = [];
       allDecals = [];
@@ -303,7 +307,11 @@ class Enemy {
     }
 
     updateLives() {
+
       this.playerLives--;
+
+      // update heart image
+      this.heartSlots[this.playerLives].src = 'images/heart-empty.png';
 
       if (this.playerLives < 1) this.isGameover = true;
     }
@@ -402,6 +410,24 @@ class Enemy {
     }
 
     gameOver() {
+      // Show result
+      gameOverModal.querySelector('.salary-score').textContent = '$' + (this.money + this.bonus);
+      gameOverModal.querySelector('.level-score').textContent = this.level;
+
+      let msg = gameOverModal.querySelector('.message');
+
+      if (this.level >= 40) {
+        msg.textContent =  `Legendary developer.`;
+      } else if (this.level >= 30) {
+        msg.textContent =  `You're a rock star.`;
+      } else if (this.level >= 15) {
+        msg.textContent =  `Senior developer.`;
+      } else if (this.level >= 4) {
+        msg.textContent =  `Junior developer.`;
+      } else {
+        msg.textContent =  `You're fired.`;
+      }
+
       gameOverModal.style.display = 'block';
       player.hide();
     }
