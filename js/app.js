@@ -41,6 +41,8 @@ class Enemy {
         player.respawn();
         // Update player's lives
         gameMaster.updateLives();
+
+        new Audio('sound/hit.mp3').play();
       }
     }
 
@@ -102,6 +104,8 @@ class Enemy {
         case 'down':
         this.y > 440 ? this.y = this.y : this.y += 83;
       }
+
+      new Audio('sound/move.mp3').play();
     }
   }
 
@@ -126,11 +130,14 @@ class Enemy {
     constructor() {
       this.sprite = 'images/key.png';
       this.isShown = true;
+      this.isSoundPlayed = false;
     }
 
     setKey(posX, posY) {
       this.x = posX;
       this.y = posY;
+
+      this.isSoundPlayed = false;
     }
 
     update() {
@@ -144,9 +151,20 @@ class Enemy {
 
     checkCollisions() {
       // If player pick up the key, hide the key and look for door
-      if (this.x === player.x && this.y === player.y) gameMaster.isPlayerGetKey = true;
+      if (this.x === player.x && this.y === player.y) {
+        gameMaster.isPlayerGetKey = true;
+        this.playSound();
+      }
+    }
+
+    playSound() {
+      if (!this.isSoundPlayed) {
+        new Audio('sound/pickup.mp3').play();
+        this.isSoundPlayed = true;
+      }
     }
   }
+
 
   class Door {
 
@@ -194,6 +212,7 @@ class Enemy {
       this.y = posY;
       this.shown = true;
       this.value = value;
+      this.isSoundPlayed = false;
     }
 
     update() {
@@ -206,12 +225,21 @@ class Enemy {
         this.shown = false;
         // Add bonus when the item is picked
         gameMaster.updateBonus(this.value);
+
+        this.playSound();
       }
     }
 
     render() {
       if (!this.shown) return;
       ctx.drawImage(Resources.get(this.sprite), this.x , this.y);
+    }
+
+    playSound() {
+      if (!this.isSoundPlayed) {
+        new Audio('sound/pickup.mp3').play();
+        this.isSoundPlayed = true;
+      }
     }
   }
 
@@ -317,7 +345,14 @@ class Enemy {
       // update heart image
       this.heartSlots[this.playerLives].src = 'images/heart-empty.png';
 
-      if (this.playerLives < 1) this.isGameover = true;
+      if (this.playerLives < 1) {
+        this.isGameover = true;
+        this.playSound();
+      }
+    }
+
+    playSound() {
+      new Audio('sound/gameover.mp3').play();
     }
 
     updateBonus(val) {
@@ -392,6 +427,7 @@ class Enemy {
 
       // Detect if player get the key
       this.isPlayerGetKey ? key.isShown = false : key.isShown = true;
+
       // Detect if player get the door with key
       // If true, reset player's postion and go to next level
       if (this.isPlayerGetDoor) {
@@ -433,6 +469,7 @@ class Enemy {
       }
 
       gameOverModal.style.display = 'block';
+
       player.hide();
     }
 

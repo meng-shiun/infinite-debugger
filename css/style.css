@@ -12,6 +12,14 @@ body {
     overflow: hidden;
 }
 
+h1 {
+  color: #cc86ad;
+  position: absolute;
+  top: 1.4em;
+  left: 0; right: 0;
+  font-size: 2.4em;
+}
+
 button {
   font-family: inherit;
 }
@@ -73,6 +81,7 @@ canvas {
 }
 
 .start-menu {
+  display: none;
   font-size: 1.2em;
 }
 
@@ -125,7 +134,7 @@ canvas {
 }
 
 .instruction {
-  display: none;
+  display: block;
   font-size: 1.15em;
   height: 460px;
   line-height: 1.6;
