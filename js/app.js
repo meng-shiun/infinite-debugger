@@ -1,14 +1,32 @@
-class Enemy {
+class Entities {
 
-  constructor(locX, locY) {
+  constructor(x, y, sprite) {
+    this.x = x;
+    this.y = y;
+    this.sprite = sprite;
+    this.isShown = true;
+  }
+
+  update() {
+    if (!this.isShown) return;
+  }
+
+  // Draw entities on the screen, required method for game
+  render() {
+    if (!this.isShown) return;
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y)
+  }
+}
+
+
+class Enemy extends Entities {
+
+  constructor(x, y, sprite) {
     // The image/sprite for our enemies, this uses a helper we've provided to easily load images
-    this.x = locX;
-    this.y = locY;
+    super(x, y, sprite);
     this.width = 64;
     this.height = 20;
     this.speed = gameMaster.levelSpeed();
-
-    this.sprite = 'images/enemy-bug.png';
   }
 
   // Update the enemy's position, required method for game
@@ -20,21 +38,19 @@ class Enemy {
 
     if (this.x > 1000) {
       // Respawn enemy position & set speed
-      this.x = gameMaster.getEnemyRandomX();
-      this.y = gameMaster.getEnemyRandomY();
+      this.x = gameMaster.enemyRandomX();
+      this.y = gameMaster.enemyRandomY();
       this.speed = gameMaster.levelSpeed();
     }
-
-    this.checkCollisions();
   }
 
   checkCollisions() {
 
     if (this.x + this.width > player.x && this.x - this.width < player.x
-      && this.y + this.height > player.y && this.y - this.height < player.y) {
+    && this.y + this.height > player.y && this.y - this.height < player.y) {
 
         // Show blood stain
-        let blood = new Decals(player.x, player.y);
+        let blood = new Decals(player.x, player.y, 'images/blood.png');
         allDecals.push(blood);
         gameMaster.isPlayerDead = true;
         // Respawn player
@@ -46,18 +62,12 @@ class Enemy {
       }
     }
 
-    // Draw the enemy on the screen, required method for game
-    render() {
-      ctx.drawImage(Resources.get(this.sprite), this.x, this.y)
-    }
   }
 
-  class Player {
+  class Player extends Entities {
 
-    constructor() {
-      this.sprite = 'images/char_01.png';
-      this.x = 404;
-      this.y = 460;
+    constructor(x, y, sprite) {
+      super(x, y, sprite);
     }
 
     respawn() {
@@ -81,16 +91,8 @@ class Enemy {
       this.y = 460;
     }
 
-    update() {
-
-    }
-
-    render() {
-      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    }
-
     handleInput(keyInput) {
-      console.log(this.x, this.y);
+
       switch (keyInput) {
         case 'left':
         this.x < 101 ? this.x = this.x : this.x -= 101;
@@ -110,43 +112,21 @@ class Enemy {
   }
 
 
-  // Decals (blood stain, trap, etc...)
-  class Decals {
+  // Decals (blood stain)
+  class Decals extends Entities {
 
-    constructor(posX, posY) {
-      this.x = posX;
-      this.y = posY;
-      this.sprite = 'images/blood.png';
-    }
-
-    render() {
-      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    constructor(x, y, sprite) {
+      super(x, y, sprite);
     }
   }
 
   // Key required for door to enter next level
-  class Key {
+  class Key extends Entities {
 
-    constructor() {
-      this.sprite = 'images/key.png';
-      this.isShown = true;
+    constructor(sprite) {
+      super();
+      this.sprite = sprite;
       this.isSoundPlayed = false;
-    }
-
-    setKey(posX, posY) {
-      this.x = posX;
-      this.y = posY;
-
-      this.isSoundPlayed = false;
-    }
-
-    update() {
-      this.checkCollisions();
-    }
-
-    render() {
-      if (!this.isShown) return;
-      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
 
     checkCollisions() {
@@ -166,16 +146,11 @@ class Enemy {
   }
 
 
-  class Door {
+  class Door extends Entities {
 
-    constructor() {
-      this.isShown = true;
-      this.sprite = 'images/door.png';
-    }
-
-    setDoor(posX, posY) {
-      this.x = posX;
-      this.y = posY;
+    constructor(sprite) {
+      super();
+      this.sprite = sprite;
     }
 
     hideDoor() {
@@ -186,16 +161,6 @@ class Enemy {
       this.isShown = true;
     }
 
-    update() {
-      if (!this.isShown) return;
-      this.checkCollisions();
-    }
-
-    render() {
-      if (!this.isShown) return;
-      ctx.drawImage(Resources.get(this.sprite), this.x , this.y);
-    }
-
     checkCollisions() { // If player pick up the key & reach the door
       if (this.x === player.x && this.y === player.y && gameMaster.isPlayerGetKey) {
         // hide the door and go to next level
@@ -204,12 +169,10 @@ class Enemy {
     }
   }
 
-  class Pickup {
+  class Pickup extends Entities {
 
-    constructor(sprite, posX, posY, value) {
-      this.sprite = sprite;
-      this.x = posX;
-      this.y = posY;
+    constructor(x, y, sprite, value) {
+      super(x, y, sprite);
       this.shown = true;
       this.value = value;
       this.isSoundPlayed = false;
@@ -243,10 +206,10 @@ class Enemy {
     }
   }
 
-  let key = new Key();
-  let door = new Door();
+  let key = new Key('images/key.png');
+  let door = new Door('images/door.png');
 
-  let player = new Player();
+  let player = new Player(404, 460, 'images/char_01.png');
 
   let allEnemies = [];
   let allDecals = [];
@@ -325,21 +288,22 @@ class Enemy {
         return y;
       }
 
-      console.log('Key postion: ', randomX, randomY());
-      key.setKey(randomX, randomY());
+      key.x = randomX;
+      key.y = randomY();
+      key.isSoundPlayed = false;
     }
 
     generateDoor() {
       let randomX = Math.floor(Math.random() * 9) * 101;
-      door.setDoor(randomX, -38);
+      door.x = randomX;
+      door.y = -38;
 
       setTimeout(() => {
         door.showDoor();
-      }, 1000);
+      }, 500);
     }
 
     updateLives() {
-
       this.playerLives--;
 
       // update heart image
@@ -363,17 +327,16 @@ class Enemy {
     }
 
     generateEnemies(num) {
-      this.enemyRandomX = () => -(Math.floor(Math.random() * 400));
-
       const positionY = [60, 144, 228, 312, 396];
 
+      this.enemyRandomX = () => -(Math.floor(Math.random() * 400));
       this.enemyRandomY = () => {
         let ind = Math.floor(Math.random() * positionY.length);
         return positionY[ind];
       }
 
       for (let i = 0; i < num; i++) {
-        let enemy = new Enemy(this.enemyRandomX(), this.enemyRandomY());
+        let enemy = new Enemy(this.enemyRandomX(), this.enemyRandomY(), 'images/enemy-bug.png');
         allEnemies.push(enemy);
       }
     }
@@ -394,9 +357,9 @@ class Enemy {
         return y;
       }
 
-      let pickupA = new Pickup('images/pickup_01.png', randomX(), randomY(), 50);
-      let pickupB = new Pickup('images/pickup_02.png', randomX(), randomY(), 10);
-      let pickupC = new Pickup('images/pickup_03.png', randomX(), randomY(), 30);
+      let pickupA = new Pickup(randomX(), randomY(), 'images/pickup_01.png', 50);
+      let pickupB = new Pickup(randomX(), randomY(), 'images/pickup_02.png', 10);
+      let pickupC = new Pickup(randomX(), randomY(), 'images/pickup_03.png', 30);
 
       let pickupArr = [pickupA, pickupB, pickupC];
 
@@ -412,13 +375,10 @@ class Enemy {
       return this.randomSpeed;
     }
 
-    getEnemyRandomX() { return this.enemyRandomX() }
-
-    getEnemyRandomY() { return this.enemyRandomY() }
-
     update() {
       // Reset game when game over
       document.querySelector('#lives').innerHTML = this.playerLives;
+
       if (this.isGameover) this.gameOver();
 
       document.querySelector('#level').textContent = this.level; // Current level
@@ -447,6 +407,14 @@ class Enemy {
         // Add extra enemy every 3 levels
         this.level % 3 === 0 ? this.generateEnemies(1) : false;
       }
+    }
+
+    gameStart() {
+      gameMaster.isGameStart = true;
+      gameMaster.generateEnemies(5);
+      gameMaster.generateKey();
+      gameMaster.generateDoor();
+      gameMaster.generatePickup();
     }
 
     gameOver() {
@@ -492,17 +460,13 @@ class Enemy {
     };
 
 
-    // Game start menu
+    // Game start/ player selection menu
     if (!gameMaster.isGameStart) {
 
       if (e.keyCode === 32) { // press space
         gameStartMenu.style.display = 'none';
         showInstruction.style.display = 'none';
-        gameMaster.isGameStart = true;
-        gameMaster.generateEnemies(5);
-        gameMaster.generateKey();
-        gameMaster.generateDoor();
-        gameMaster.generatePickup();
+        gameMaster.gameStart();
       } else if (e.keyCode === 37) { // select left hand player
         gameMaster.charInd <= 0 ? false : gameMaster.choosePlayer(-1);
       } else if (e.keyCode === 39) { // select right hand player
@@ -536,7 +500,7 @@ class Enemy {
     let parent = e.target.parentNode;
     if (target.contains('open') && parent.querySelector('svg').classList.contains('gameplay') ||
         target.contains('close') && parent.querySelector('svg').classList.contains('gameplay')) {
-          parent.querySelector('.gameplay').classList.add('active');
+        parent.querySelector('.gameplay').classList.add('active');
     }
   });
 
@@ -545,6 +509,6 @@ class Enemy {
     let parent = e.target.parentNode;
     if (target.contains('open') && parent.querySelector('svg').classList.contains('gameplay') ||
         target.contains('close') && parent.querySelector('svg').classList.contains('gameplay')) {
-          parent.querySelector('.gameplay').classList.remove('active');
+        parent.querySelector('.gameplay').classList.remove('active');
     }
   });

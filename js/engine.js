@@ -97,7 +97,11 @@ var Engine = (function(global) {
       enemy.checkCollisions();
     });
     key.update();
+    key.checkCollisions();
+
     door.update();
+    door.checkCollisions();
+
     player.update();
     allPickup.forEach(function(pickup) {
       pickup.update();
@@ -128,8 +132,6 @@ var Engine = (function(global) {
     numRows = 7,
     numCols = 9,
     row, col;
-
-    var keyImage = 'images/key.png';
 
     // Before drawing, clear existing canvas
     ctx.clearRect(0,0,canvas.width,canvas.height)
@@ -162,7 +164,6 @@ var Engine = (function(global) {
     /* Loop through all of the objects within the allEnemies array and call
     * the render function you have defined.
     */
-
     allDecals.forEach(function(decal) {
       decal.render();
     });
