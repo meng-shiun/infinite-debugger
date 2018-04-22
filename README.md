@@ -5,7 +5,7 @@ This project is built for Udacity Front-End Web Developer Nanodegree.
 
 ## Game Page
 
-Visit [Infinite Debugger](https://htmlpreview.github.io/?https://github.com/meng-shiun/infinite-debugger/blob/master/index.html) for live preview.
+Visit [Infinite Debugger](https://mengshiunlin.com/infinite_debugger/) for the latest version.
 
 
 ## Gameplay
