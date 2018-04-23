@@ -7,6 +7,9 @@ This project is built for Udacity Front-End Web Developer Nanodegree.
 
 Visit [Infinite Debugger](https://mengshiunlin.com/infinite_debugger/) for the latest version.
 
+## Run the game locally
+
+To run the game, download zip or clone repository and open `index.html` in your browser.
 
 ## Gameplay
 
