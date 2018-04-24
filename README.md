@@ -28,6 +28,7 @@ To run the game, download zip or clone repository and open `index.html` in your 
 
 ### Todos
 
+* Separate the class definitions into separate files using `browserify`, `webpack` etc.,
 * Animate characters & items.
 * Add obstacles and pickups.
 * Add character & special power.
@@ -35,5 +36,6 @@ To run the game, download zip or clone repository and open `index.html` in your 
 * Rewrite game engine.
 * Minify css and js file.
 * Use Babel to compile js files.
+
 
 ### Bugs

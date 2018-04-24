@@ -410,11 +410,11 @@ class Enemy extends Entities {
     }
 
     gameStart() {
-      gameMaster.isGameStart = true;
-      gameMaster.generateEnemies(5);
-      gameMaster.generateKey();
-      gameMaster.generateDoor();
-      gameMaster.generatePickup();
+      this.isGameStart = true;
+      this.generateEnemies(5);
+      this.generateKey();
+      this.generateDoor();
+      this.generatePickup();
     }
 
     gameOver() {
